@@ -1,0 +1,46 @@
+### 1. Crear primer activo (Bitcoin)
+POST http://localhost:8080/api/crypto/activos
+Content-Type: application/json
+
+{
+  "simbolo": "bitcoin",
+  "nombre": "Bitcoin",
+  "cantidad": 0.5
+}
+
+###
+
+### 2. Crear segundo activo (Ethereum)
+POST http://localhost:8080/api/crypto/activos
+Content-Type: application/json
+
+{
+  "simbolo": "ethereum",
+  "nombre": "Ethereum",
+  "cantidad": 2.0
+}
+
+###
+
+### 3. Obtener valoración (Primera llamada -> Consulta H2 y consume API de CoinGecko)
+GET http://localhost:8080/api/crypto/activos/1/valorar
+
+###
+
+### 4. Probar valoracion CON COMISION POR DEFECTO (2.0%) -> Debe dar HTTP 200 OK
+GET http://localhost:8080/api/crypto/activos/1/valorar-comision
+
+###
+
+### 5. Probar valoracion CON COMISION EXPLICITA (5.0%) -> Debe dar HTTP 200 OK
+GET http://localhost:8080/api/crypto/activos/1/valorar-comision?porcentaje=5.0
+
+###
+
+### 6. Valoración CON COMISIÓN CERO (Mínimo permitido: 0%) -> HTTP 200 OK
+GET http://localhost:8080/api/crypto/activos/1/valorar-comision?porcentaje=0
+
+###
+
+### 7. Probar COMISION FUERA DE RANGO (60%) -> Debe dar HTTP 400 Bad Request
+GET http://localhost:8080/api/crypto/activos/1/valorar-comision?porcentaje=60

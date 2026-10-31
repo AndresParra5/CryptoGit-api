@@ -61,4 +61,38 @@ public class CryptoService {
                 "Cotización en tiempo real vía CoinGecko API"
         );
     }
+
+    /**
+     * Lógica de negocio: Valida el rango de comisión y actualiza la valoración del activo.
+     */
+    public CarteraValoradaDTO valorarActivoConComision(Long id, double porcentajeComision) {
+
+        // VALIDACIÓN DE RANGOS (Regla de negocio condicional):
+        // Si la comisión es menor a 0 o mayor a 50%, lanzamos una excepción de error.
+        if (porcentajeComision < 0 || porcentajeComision > 50) {
+            throw new IllegalArgumentException("Error: La comisión debe estar entre 0% y 50%.");
+        }
+
+        // Llamamos al metodo valorarActivo(id) para obtener los datos base.
+        CarteraValoradaDTO dto = valorarActivo(id);
+
+        // AÑADIMOS EL CÁLCULO DE LA COMISIÓN:
+        // Si hay comisión, recalculamos el valor total en euros una sola vez.
+        if (porcentajeComision > 0) {
+            double valorConComision = dto.getValorTotalEur() * (1 + porcentajeComision / 100);
+            dto.setValorTotalEur(valorConComision);
+        }
+
+        // AÑADIMOS MENSAJES DINÁMICOS/CONDICIONALES:
+        // Concatenamos un texto explicativo en el campo "fuente" del DTO según el tramo de la comisión.
+        if (porcentajeComision == 0) {
+            dto.setFuente(dto.getFuente() + " | Operación libre de comisiones");
+        } else if (porcentajeComision > 10) {
+            dto.setFuente(dto.getFuente() + " | ¡Aviso! Comisión alta aplicada: " + porcentajeComision + "%");
+        } else {
+            dto.setFuente(dto.getFuente() + " | Comisión estándar: " + porcentajeComision + "%");
+        }
+
+        return dto;
+    }
 }
