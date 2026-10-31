@@ -10,3 +10,33 @@ Content-Type: application/json
   "nombre": "Ethereum",
   "cantidad": 2.5
 }
+
+###
+
+### 3. Buscar activo por ID existente (Devuelve ActivoCryptoDTO)
+GET http://localhost:8080/api/crypto/activos/1
+Accept: application/json
+
+###
+
+### 4. Buscar activo por ID inexistente (Debe devolver HTTP 404 Not Found)
+GET http://localhost:8080/api/crypto/activos/999
+Accept: application/json
+
+###
+
+### 5. Buscar activo por símbolo en minúsculas (Devuelve ActivoCryptoDTO)
+GET http://localhost:8080/api/crypto/activos/buscar?simbolo=ethereum
+Accept: application/json
+
+###
+
+### 6. Buscar activo por símbolo en mayúsculas (Prueba de insensibilidad a mayúsculas)
+GET http://localhost:8080/api/crypto/activos/buscar?simbolo=ETHEREUM
+Accept: application/json
+
+###
+
+### 7. Buscar activo por símbolo inexistente (Debe devolver HTTP 404 Not Found)
+GET http://localhost:8080/api/crypto/activos/buscar?simbolo=doge
+Accept: application/json

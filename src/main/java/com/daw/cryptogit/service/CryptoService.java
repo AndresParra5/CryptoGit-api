@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class CryptoService {
@@ -105,5 +106,17 @@ public class CryptoService {
         }
 
         return dto;
+    }
+
+    // Buscar activo por su ID en la BD
+    public Optional<ActivoCryptoDTO> obtenerPorId(Long id) {
+        return repository.findById(id)
+                .map(a -> new ActivoCryptoDTO(a.getId(), a.getSimbolo(), a.getNombre(), a.getCantidad()));
+    }
+
+    // Buscar activo por símbolo (ej: ?simbolo=btc)
+    public Optional<ActivoCryptoDTO> obtenerPorSimbolo(String simbolo) {
+        return repository.findBySimbolo(simbolo.toLowerCase())
+                .map(a -> new ActivoCryptoDTO(a.getId(), a.getSimbolo(), a.getNombre(), a.getCantidad()));
     }
 }

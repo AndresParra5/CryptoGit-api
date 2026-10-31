@@ -72,4 +72,20 @@ public class CryptoController {
             return ResponseEntity.badRequest().build();
         }
     }
+
+    // GET http://localhost:8080/api/crypto/activos/1
+    @GetMapping("/activos/{id}")
+    public ResponseEntity<ActivoCryptoDTO> obtenerPorId(@PathVariable Long id) {
+        return service.obtenerPorId(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    // GET http://localhost:8080/api/crypto/activos/buscar?simbolo=btc
+    @GetMapping("/activos/buscar")
+    public ResponseEntity<ActivoCryptoDTO> obtenerPorSimbolo(@RequestParam String simbolo) {
+        return service.obtenerPorSimbolo(simbolo)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
 }

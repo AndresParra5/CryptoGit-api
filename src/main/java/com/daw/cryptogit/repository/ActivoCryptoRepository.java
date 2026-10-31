@@ -8,5 +8,6 @@ import java.util.Optional;
 
 @Repository
 public interface ActivoCryptoRepository extends JpaRepository<ActivoCrypto, Long> {
+    // Búsqueda por símbolo (ej: "btc", "eth")
     Optional<ActivoCrypto> findBySimbolo(String simbolo);
 }
