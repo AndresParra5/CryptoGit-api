@@ -1,7 +1,9 @@
 package com.daw.cryptogit.service;
 
+import com.daw.cryptogit.dto.ActivoCryptoDTO;
 import com.daw.cryptogit.dto.CarteraValoradaDTO;
 import com.daw.cryptogit.dto.CoinGeckoResponseDTO;
+import com.daw.cryptogit.dto.CrearActivoDTO;
 import com.daw.cryptogit.model.ActivoCrypto;
 import com.daw.cryptogit.repository.ActivoCryptoRepository;
 import org.springframework.cache.annotation.CacheEvict;
@@ -23,15 +25,24 @@ public class CryptoService {
         this.restClient = restClient;
     }
 
-    public List<ActivoCrypto> obtenerTodos() {
-        return repository.findAll();
+    // Convertir lista de entidades a DTOs de salida
+    public List<ActivoCryptoDTO> obtenerTodos() {
+        return repository.findAll().stream()
+                .map(a -> new ActivoCryptoDTO(a.getId(), a.getSimbolo(), a.getNombre(), a.getCantidad()))
+                .toList();
     }
 
+    // Convertir DTO de entrada a Entidad -> Guardar -> Devolver DTO de salida
     @CacheEvict(value = "cotizaciones", allEntries = true)
-    public ActivoCrypto guardarActivo(ActivoCrypto activo) {
-        // Normalizamos el símbolo a minúsculas
-        activo.setSimbolo(activo.getSimbolo().toLowerCase());
-        return repository.save(activo);
+    public ActivoCryptoDTO guardarActivo(CrearActivoDTO dto) {
+        ActivoCrypto activo = new ActivoCrypto();
+        activo.setSimbolo(dto.getSimbolo().toLowerCase());
+        activo.setNombre(dto.getNombre());
+        activo.setCantidad(dto.getCantidad());
+
+        ActivoCrypto guardado = repository.save(activo);
+
+        return new ActivoCryptoDTO(guardado.getId(), guardado.getSimbolo(), guardado.getNombre(), guardado.getCantidad());
     }
 
     @Cacheable(value = "cotizaciones", key = "#id")

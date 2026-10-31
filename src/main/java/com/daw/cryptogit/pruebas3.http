@@ -1,0 +1,12 @@
+### 1. Listar activos (Devuelve array de ActivoCryptoDTO)
+GET http://localhost:8080/api/crypto/activos
+
+### 2. Crear nuevo activo (Envía CrearActivoDTO sin ID)
+POST http://localhost:8080/api/crypto/activos
+Content-Type: application/json
+
+{
+  "simbolo": "ethereum",
+  "nombre": "Ethereum",
+  "cantidad": 2.5
+}
