@@ -17,6 +17,7 @@ public class CryptoService {
     private final ActivoCryptoRepository repository;
     private final RestClient restClient;
 
+
     public CryptoService(ActivoCryptoRepository repository, RestClient restClient) {
         this.repository = repository;
         this.restClient = restClient;
