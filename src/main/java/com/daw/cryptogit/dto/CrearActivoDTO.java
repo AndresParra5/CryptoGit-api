@@ -50,7 +50,7 @@ public class CrearActivoDTO {
 
     // 8. Confirmación booleana obligatoria
     @AssertTrue(message = "Debe aceptar la declaración de riesgo cripto marcando el campo como true")
-    private boolean riesgoAceptado;
+    private Boolean riesgoAceptado;
 
     // 9. Colección no vacía
     @NotEmpty(message = "Debe añadir al menos una etiqueta/tag para categorizar el activo")

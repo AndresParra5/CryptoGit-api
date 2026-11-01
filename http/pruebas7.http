@@ -1,0 +1,146 @@
+### ==========================================
+### PRUEBAS DE LA PRÁCTICA 7 - RESPUESTAS SEMÁNTICAS Y CONTROL GLOBAL DE ERRORES
+### ==========================================
+
+### 1. GET - Listar todos los activos (Esperado: 200 OK)
+GET http://localhost:8080/api/crypto/activos
+Accept: application/json
+
+###
+
+### 2. GET - Obtener activo existente por ID (Esperado: 200 OK)
+GET http://localhost:8080/api/crypto/activos/1
+Accept: application/json
+
+###
+
+### 3. GET - Buscar por símbolo existente (Esperado: 200 OK)
+GET http://localhost:8080/api/crypto/activos/buscar?simbolo=bitcoin
+Accept: application/json
+
+###
+
+### 4. POST - Crear nuevo activo válido (Esperado: 201 CREATED)
+POST http://localhost:8080/api/crypto/activos
+Content-Type: application/json
+
+{
+  "simbolo": "DOT",
+  "nombre": "Polkadot",
+  "cantidad": 150.0,
+  "precioCompraEur": 6.80,
+  "emailAnalista": "analista@cryptogit.com",
+  "fechaAdquisicion": "2024-02-10",
+  "fechaRevision": "2027-06-01",
+  "riesgoAceptado": true,
+  "etiquetas": ["Layer1", "Staking"]
+}
+
+###
+
+### 5. PUT - Actualización completa de activo ID: 2 (Esperado: 200 OK)
+PUT http://localhost:8080/api/crypto/activos/2
+Content-Type: application/json
+
+{
+  "simbolo": "ethereum",
+  "nombre": "Ethereum Staked 2.0",
+  "cantidad": 5.5,
+  "precioCompraEur": 2950.00,
+  "emailAnalista": "senior@cryptogit.com",
+  "fechaAdquisicion": "2023-11-15",
+  "fechaRevision": "2027-12-01",
+  "riesgoAceptado": true,
+  "etiquetas": ["DeFi", "Layer1"]
+}
+
+###
+
+### 6. PATCH - Actualización parcial de activo ID: 3 (Esperado: 200 OK)
+PATCH http://localhost:8080/api/crypto/activos/3
+Content-Type: application/json
+
+{
+  "cantidad": 8.0,
+  "emailAnalista": "patch_test@cryptogit.com"
+}
+
+###
+
+### 7. DELETE - Eliminar activo ID: 4 (Esperado: 204 NO CONTENT sin cuerpo)
+DELETE http://localhost:8080/api/crypto/activos/4
+
+###
+
+### ==========================================
+### CASOS DE ERROR CONTROLADOS (GlobalExceptionHandler)
+### ==========================================
+
+### 8. ERROR 404 - Buscar activo por ID inexistente (Esperado: 404 NOT FOUND + ErrorResponse JSON)
+GET http://localhost:8080/api/crypto/activos/9999
+Accept: application/json
+
+###
+
+### 9. ERROR 404 - Eliminar activo inexistente (Esperado: 404 NOT FOUND + ErrorResponse JSON)
+DELETE http://localhost:8080/api/crypto/activos/9999
+
+###
+
+### 10. ERROR 400 - Crear activo con datos inválidos (Esperado: 400 BAD REQUEST con desglose de campos)
+POST http://localhost:8080/api/crypto/activos
+Content-Type: application/json
+
+{
+  "simbolo": "",
+  "nombre": "A",
+  "cantidad": -10.0,
+  "emailAnalista": "correo-invalido"
+}
+
+###
+
+### 11. ERROR 400 - Múltiples fallos de validación DTO (Prueba varios campos en erroresCampo)
+POST http://localhost:8080/api/crypto/activos
+Content-Type: application/json
+
+{
+  "simbolo": "",
+  "nombre": "",
+  "cantidad": -5.0,
+  "precioCompraEur": -100.0,
+  "emailAnalista": "email-invalido"
+}
+
+###
+
+### 12. ERROR 400 - Regla de negocio: ComisionInvalidaException (> 50%)
+GET http://localhost:8080/api/crypto/activos/1/valorar-comision?porcentaje=65.0
+Accept: application/json
+
+###
+
+### 13. ERROR 400 - Regla de negocio: ComisionInvalidaException (< 0%)
+GET http://localhost:8080/api/crypto/activos/1/valorar-comision?porcentaje=-10.0
+Accept: application/json
+
+###
+
+### 14. ERROR 400 - PUT con datos incompletos (Esperado: 400 BAD REQUEST)
+PUT http://localhost:8080/api/crypto/activos/1
+Content-Type: application/json
+
+{
+  "simbolo": "bitcoin",
+  "cantidad": -5.0
+}
+
+###
+
+### 15. ERROR 400 - PATCH con valor inválido en campo presente (Esperado: 400 BAD REQUEST)
+PATCH http://localhost:8080/api/crypto/activos/1
+Content-Type: application/json
+
+{
+  "emailAnalista": "email-invalido"
+}

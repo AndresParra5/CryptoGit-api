@@ -63,50 +63,41 @@ public class CryptoController {
      */
     @GetMapping("/activos/{id}/valorar-comision")
     public ResponseEntity<CarteraValoradaDTO> valorarConComision(
-            @PathVariable Long id,						// Captura la variable de la URL
-            @RequestParam(defaultValue = "2.0") double porcentaje) {	// Captura el Query Param opcional
-
-        try {
-            // Delegamos la lógica completa al servicio
-            CarteraValoradaDTO resultado = service.valorarActivoConComision(id, porcentaje);
-            return ResponseEntity.ok(resultado); // Devuelve HTTP 200 OK con el DTO
-        } catch (IllegalArgumentException e) {
-            // // Si el servicio lanza la excepción del rango (menor a 0 o mayor a 50), devolvemos un 400 Bad Request
-            return ResponseEntity.badRequest().build();
-        }
+            @PathVariable Long id,
+            @RequestParam(defaultValue = "2.0") double porcentaje) {
+        return ResponseEntity.ok(service.valorarActivoConComision(id, porcentaje));
     }
 
     // GET http://localhost:8080/api/crypto/activos/1
     @GetMapping("/activos/{id}")
     public ResponseEntity<ActivoCryptoDTO> obtenerPorId(@PathVariable Long id) {
-        return service.obtenerPorId(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        ActivoCryptoDTO dto = service.obtenerPorId(id);
+        return ResponseEntity.ok(dto);
     }
 
     // GET http://localhost:8080/api/crypto/activos/buscar?simbolo=btc
     @GetMapping("/activos/buscar")
     public ResponseEntity<ActivoCryptoDTO> obtenerPorSimbolo(@RequestParam String simbolo) {
-        return service.obtenerPorSimbolo(simbolo)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        ActivoCryptoDTO dto = service.obtenerPorSimbolo(simbolo);
+        return ResponseEntity.ok(dto);
     }
 
     // PUT /activos/{id} -> Actualización completa usando CrearActivoDTO
     @PutMapping("/activos/{id}")
-    public ActivoCryptoDTO actualizarCompleto(@PathVariable Long id, @Valid @RequestBody CrearActivoDTO dto) {
-        return service.actualizarCompleto(id, dto);
+    public ResponseEntity<ActivoCryptoDTO> actualizarCompleto(@PathVariable Long id, @Valid @RequestBody CrearActivoDTO dto) {
+        return ResponseEntity.ok(service.actualizarCompleto(id, dto));
     }
 
     // PATCH /activos/{id} -> Actualización parcial usando PatchActivoDTO
     @PatchMapping("/activos/{id}")
-    public ActivoCryptoDTO actualizarParcial(@PathVariable Long id, @Valid @RequestBody PatchActivoDTO dto) {
-        return service.actualizarParcial(id, dto);
+    public ResponseEntity<ActivoCryptoDTO> actualizarParcial(@PathVariable Long id, @Valid @RequestBody PatchActivoDTO dto) {
+        return ResponseEntity.ok(service.actualizarParcial(id, dto));
     }
 
     // DELETE /activos/{id} -> Borrado por ID
     @DeleteMapping("/activos/{id}")
-    public void eliminar(@PathVariable Long id) {
+    public ResponseEntity<Void> eliminar(@PathVariable Long id) {
         service.eliminar(id);
+        return ResponseEntity.noContent().build();
     }
 }
