@@ -26,10 +26,26 @@ public class CryptoService {
         this.restClient = restClient;
     }
 
+    // Metodo privado auxiliar en CryptoService
+    private ActivoCryptoDTO convertirADto(ActivoCrypto activo) {
+        return new ActivoCryptoDTO(
+                activo.getId(),
+                activo.getSimbolo(),
+                activo.getNombre(),
+                activo.getCantidad(),
+                activo.getPrecioCompraEur(),
+                activo.getEmailAnalista(),
+                activo.getFechaAdquisicion(),
+                activo.getFechaRevision(),
+                activo.isRiesgoAceptado(),
+                activo.getEtiquetas()
+        );
+    }
+
     // Convertir lista de entidades a DTOs de salida
     public List<ActivoCryptoDTO> obtenerTodos() {
         return repository.findAll().stream()
-                .map(a -> new ActivoCryptoDTO(a.getId(), a.getSimbolo(), a.getNombre(), a.getCantidad()))
+                .map(this::convertirADto)
                 .toList();
     }
 
@@ -40,10 +56,16 @@ public class CryptoService {
         activo.setSimbolo(dto.getSimbolo().toLowerCase());
         activo.setNombre(dto.getNombre());
         activo.setCantidad(dto.getCantidad());
+        activo.setPrecioCompraEur(dto.getPrecioCompraEur());
+        activo.setEmailAnalista(dto.getEmailAnalista());
+        activo.setFechaAdquisicion(dto.getFechaAdquisicion());
+        activo.setFechaRevision(dto.getFechaRevision());
+        activo.setRiesgoAceptado(dto.isRiesgoAceptado());
+        activo.setEtiquetas(dto.getEtiquetas());
 
         ActivoCrypto guardado = repository.save(activo);
 
-        return new ActivoCryptoDTO(guardado.getId(), guardado.getSimbolo(), guardado.getNombre(), guardado.getCantidad());
+        return convertirADto(guardado);
     }
 
     @Cacheable(value = "cotizaciones", key = "#id")
@@ -111,12 +133,12 @@ public class CryptoService {
     // Buscar activo por su ID en la BD
     public Optional<ActivoCryptoDTO> obtenerPorId(Long id) {
         return repository.findById(id)
-                .map(a -> new ActivoCryptoDTO(a.getId(), a.getSimbolo(), a.getNombre(), a.getCantidad()));
+                .map(this::convertirADto);
     }
 
     // Buscar activo por símbolo (ej: ?simbolo=btc)
     public Optional<ActivoCryptoDTO> obtenerPorSimbolo(String simbolo) {
         return repository.findBySimbolo(simbolo.toLowerCase())
-                .map(a -> new ActivoCryptoDTO(a.getId(), a.getSimbolo(), a.getNombre(), a.getCantidad()));
+                .map(this::convertirADto);
     }
 }

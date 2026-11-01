@@ -1,0 +1,159 @@
+### ===================================================================
+### SUITE DE PRUEBAS DE VALIDACIÓN Y ENDPOINTS EN CRYPTOGIT
+### ===================================================================
+
+### -------------------------------------------------------------------
+### 1. PRUEBAS DE VALIDACIÓN @Valid (POST /api/crypto/activos)
+### -------------------------------------------------------------------
+
+### 1.1 Intento FALLIDO: Múltiples fallos de validación a la vez
+# Resultado esperado: HTTP/1.1 400 Bad Request
+# - simbolo: "btc" en minúsculas (falla Pattern)
+# - nombre: "A" demasiado corto (falla Size min=3)
+# - cantidad: -5.0 negativa (falla Positive)
+# - precioCompraEur: 0.00 menor al mínimo (falla DecimalMin "0.01")
+# - emailAnalista: "analista-sin-arroba" (falla Email)
+# - fechaAdquisicion: "2030-01-01" en el futuro (falla PastOrPresent)
+# - fechaRevision: "2020-01-01" en el pasado (falla Future)
+# - riesgoAceptado: false (falla AssertTrue)
+# - etiquetas: [] lista vacía (falla NotEmpty)
+POST http://localhost:8080/api/crypto/activos
+Content-Type: application/json
+
+{
+  "simbolo": "btc",
+  "nombre": "A",
+  "cantidad": -5.0,
+  "precioCompraEur": 0.00,
+  "emailAnalista": "analista-sin-arroba",
+  "fechaAdquisicion": "2030-01-01",
+  "fechaRevision": "2020-01-01",
+  "riesgoAceptado": false,
+  "etiquetas": []
+}
+
+###
+
+### 1.2 Intento FALLIDO: Formato de Símbolo incorrecto (Regex)
+# Resultado esperado: HTTP/1.1 400 Bad Request
+# Falla Pattern: Contiene minúsculas y caracteres no permitidos
+POST http://localhost:8080/api/crypto/activos
+Content-Type: application/json
+
+{
+  "simbolo": "solana_123",
+  "nombre": "Solana",
+  "cantidad": 10.0,
+  "precioCompraEur": 140.50,
+  "emailAnalista": "analista@cryptogit.com",
+  "fechaAdquisicion": "2026-01-15",
+  "fechaRevision": "2027-01-15",
+  "riesgoAceptado": true,
+  "etiquetas": ["L1", "SPEED"]
+}
+
+###
+
+### 1.3 Intento FALLIDO: Exceso de dígitos decimales
+# Resultado esperado: HTTP/1.1 400 Bad Request
+# Falla Digits: superó los 8 decimales (tiene 10)
+POST http://localhost:8080/api/crypto/activos
+Content-Type: application/json
+
+{
+  "simbolo": "ETH",
+  "nombre": "Ethereum",
+  "cantidad": 2.123456789012,
+  "precioCompraEur": 3200.00,
+  "emailAnalista": "analista@cryptogit.com",
+  "fechaAdquisicion": "2026-02-01",
+  "fechaRevision": "2027-02-01",
+  "riesgoAceptado": true,
+  "etiquetas": ["L1", "SMART-CONTRACTS"]
+}
+
+###
+
+### 1.4 Intento CORRECTO 1: Registrar Bitcoin (Símbolo válido para CoinGecko: BTC o BITCOIN según tu Regex)
+# Resultado esperado: HTTP/1.1 201 Created
+POST http://localhost:8080/api/crypto/activos
+Content-Type: application/json
+
+{
+  "simbolo": "BITCOIN",
+  "nombre": "Bitcoin",
+  "cantidad": 0.5,
+  "precioCompraEur": 45000.0,
+  "emailAnalista": "analista@cryptogit.com",
+  "fechaAdquisicion": "2026-01-10",
+  "fechaRevision": "2027-01-10",
+  "riesgoAceptado": true,
+  "etiquetas": ["BTC", "STORE_OF_VALUE"]
+}
+
+###
+
+### 1.5 Intento CORRECTO 2: Registro de Polkadot (DOT)
+# Resultado esperado: HTTP/1.1 201 Created
+POST http://localhost:8080/api/crypto/activos
+Content-Type: application/json
+
+{
+  "simbolo": "DOT",
+  "nombre": "Polkadot",
+  "cantidad": 150.0,
+  "precioCompraEur": 7.20,
+  "emailAnalista": "senior@cryptogit.com",
+  "fechaAdquisicion": "2026-02-10",
+  "fechaRevision": "2026-12-31",
+  "riesgoAceptado": true,
+  "etiquetas": ["PARACHAIN", "INTEROPERABILITY"]
+}
+
+### -------------------------------------------------------------------
+### 2. CONSULTAS Y VERIFICACIÓN (GET)
+### -------------------------------------------------------------------
+
+### 2.1 Obtener todos los activos registardos (comprobar DTO de Salida con 10 campos)
+# Resultado esperado: HTTP/1.1 200 OK
+GET http://localhost:8080/api/crypto/activos
+Accept: application/json
+
+###
+
+### 2.2 Buscar activo por ID
+# Resultado esperado: HTTP/1.1 200 OK
+GET http://localhost:8080/api/crypto/activos/1
+Accept: application/json
+
+###
+
+### 2.3 Buscar activo por Símbolo
+# Resultado esperado: HTTP/1.1 200 OK
+GET http://localhost:8080/api/crypto/activos/buscar?simbolo=AVAX
+Accept: application/json
+
+### -------------------------------------------------------------------
+### 3. INTEGRACIÓN CON COINGECKO Y REGLAS DE COMISIÓN (GET)
+### -------------------------------------------------------------------
+
+### 3.1 Valorar activo con ID 1 (Petición externa a CoinGecko)
+# Resultado esperado: HTTP/1.1 200 OK
+GET http://localhost:8080/api/crypto/activos/1/valorar
+Accept: application/json
+
+###
+
+### 3.2 Valorar con comisión válida (2.5%)
+# Resultado esperado: HTTP/1.1 200 OK
+GET http://localhost:8080/api/crypto/activos/1/valorar-comision?porcentaje=2.5
+Accept: application/json
+
+###
+
+### 3.3 Valorar con comisión fuera de rango (60.0%)
+# Resultado esperado: HTTP/1.1 400 Bad Request (Lanza IllegalArgumentException)
+GET http://localhost:8080/api/crypto/activos/1/valorar-comision?porcentaje=60.0
+Accept: application/json
+
+
