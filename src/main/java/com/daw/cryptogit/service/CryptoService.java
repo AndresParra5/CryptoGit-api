@@ -150,6 +150,7 @@ public class CryptoService {
 
 
     // Reemplazo completo (PUT)
+    @CacheEvict(value = "cotizaciones", allEntries = true)
     public ActivoCryptoDTO actualizarCompleto(Long id, CrearActivoDTO dto) {
         ActivoCrypto activoExistente = buscarEntidadPorId(id);
 
@@ -171,6 +172,7 @@ public class CryptoService {
     }
 
     // Modificación parcial (PATCH)
+    @CacheEvict(value = "cotizaciones", allEntries = true)
     public ActivoCryptoDTO actualizarParcial(Long id, PatchActivoDTO dto) {
         ActivoCrypto activoExistente = buscarEntidadPorId(id);
 
@@ -189,6 +191,7 @@ public class CryptoService {
     }
 
     // Borrado por ID (DELETE)
+    @CacheEvict(value = "cotizaciones", allEntries = true)
     public void eliminar(Long id) {
         ActivoCrypto activoExistente = buscarEntidadPorId(id);
         repository.delete(activoExistente);

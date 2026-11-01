@@ -1,0 +1,122 @@
+### ==========================================
+### CRYPTOGIT - PRUEBAS DE CACHÉ Y SWAGGER UI
+### Base URL: http://localhost:8080/api/crypto
+### ==========================================
+
+### -------------------------------------------------------------------
+### 1. COMPROBAR ENTORNO ACTIVO
+### -------------------------------------------------------------------
+GET http://localhost:8080/api/crypto/entorno
+Accept: application/json
+
+###
+
+### -------------------------------------------------------------------
+### 2. LISTAR TODOS LOS ACTIVOS
+### Devuelve los activos iniciales cargados desde data.sql.
+### -------------------------------------------------------------------
+GET http://localhost:8080/api/crypto/activos
+Accept: application/json
+
+###
+
+### -------------------------------------------------------------------
+### 3. PRUEBA DE CACHÉ - PASO A (MISS DE CACHÉ)
+### Primera consulta de valoración para el activo con ID 1 (ej. Bitcoin del data.sql).
+### -> Debe tardar entre 200 ms y 500 ms (llamada real a CoinGecko API).
+### -------------------------------------------------------------------
+GET http://localhost:8080/api/crypto/activos/1/valorar
+Accept: application/json
+
+###
+
+### -------------------------------------------------------------------
+### 4. PRUEBA DE CACHÉ - PASO B (HIT DE CACHÉ)
+### Segunda consulta idéntica para el ID 1.
+### -> Debe responder casi al instante (< 10 ms) recuperando de RAM.
+### -------------------------------------------------------------------
+GET http://localhost:8080/api/crypto/activos/1/valorar
+Accept: application/json
+
+###
+
+### -------------------------------------------------------------------
+### 5. VALORACIÓN CON COMISIÓN (REUTILIZA CACHÉ)
+### Consulta dinámica con porcentaje (3.5%).
+### -------------------------------------------------------------------
+GET http://localhost:8080/api/crypto/activos/1/valorar-comision?porcentaje=3.5
+Accept: application/json
+
+###
+
+### -------------------------------------------------------------------
+### 6. PRUEBA DE INVALIDACIÓN DE CACHÉ (@CacheEvict)
+### Insertamos un NUEVO activo que NO está en data.sql (Solana) para purgar la caché.
+### -------------------------------------------------------------------
+POST http://localhost:8080/api/crypto/activos
+Content-Type: application/json
+
+{
+  "simbolo": "solana",
+  "nombre": "Solana",
+  "cantidad": 15.0,
+  "precioCompraEur": 145.50,
+  "emailAnalista": "analista.sol@crypto.com",
+  "fechaAdquisicion": "2026-02-01",
+  "fechaRevision": "2027-02-01",
+  "riesgoAceptado": true,
+  "etiquetas": ["L1", "HIGH_THROUGHPUT"]
+}
+
+###
+
+### -------------------------------------------------------------------
+### 7. PRUEBA DE CACHÉ - PASO C (REFRESCO TRAS EVICT)
+### Volvemos a consultar la valoración del ID 1 tras el POST.
+### -> Debe tardar de nuevo ~300 ms al haberse purgado la caché en el paso 6.
+### -------------------------------------------------------------------
+GET http://localhost:8080/api/crypto/activos/1/valorar
+Accept: application/json
+
+###
+
+### -------------------------------------------------------------------
+### 8. ACTUALIZACIÓN PARCIAL (PATCH)
+### Modificación parcial sobre el activo con ID 1.
+### -------------------------------------------------------------------
+PATCH http://localhost:8080/api/crypto/activos/1
+Content-Type: application/json
+
+{
+  "cantidad": 1.25,
+  "emailAnalista": "senior.analista@crypto.com"
+}
+
+###
+
+### -------------------------------------------------------------------
+### 9. PRUEBA DE ERRORES / VALIDACIÓN DTO (BEAN VALIDATION)
+### Petición enviando Cardano con datos no válidos (símbolo corto, cantidad negativa, etc.)
+### -------------------------------------------------------------------
+POST http://localhost:8080/api/crypto/activos
+Content-Type: application/json
+
+{
+  "simbolo": "a",
+  "nombre": "Cardano",
+  "cantidad": -10.0,
+  "precioCompraEur": 0.00,
+  "emailAnalista": "email-invalido",
+  "fechaAdquisicion": "2030-01-01",
+  "fechaRevision": "2020-01-01",
+  "riesgoAceptado": false,
+  "etiquetas": []
+}
+
+###
+
+### -------------------------------------------------------------------
+### 10. ELIMINACIÓN DE ACTIVO (DELETE)
+### Borrado del activo con ID 2 (devuelve 204 No Content).
+### -------------------------------------------------------------------
+DELETE http://localhost:8080/api/crypto/activos/2

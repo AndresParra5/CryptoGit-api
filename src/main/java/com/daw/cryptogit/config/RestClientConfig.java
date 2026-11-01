@@ -6,11 +6,11 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestClient;
 
 @Configuration
-@EnableCaching
+@EnableCaching // Activa el gestor de almacenamiento en RAM de Spring Boot. Sin esto, Spring ignora @Cacheable
 public class RestClientConfig {
 
     @Bean
     public RestClient restClient() {
-        return RestClient.create();
+        return RestClient.builder().build();
     }
 }
