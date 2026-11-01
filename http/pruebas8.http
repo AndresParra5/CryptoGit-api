@@ -1,0 +1,70 @@
+### Variables globales
+@baseUrl = http://localhost:8080/api/crypto/activos
+
+### 1. Obtener todos los activos
+GET {{baseUrl}}
+Accept: application/json
+
+###
+
+### 2. Obtener activo por ID (GET)
+GET {{baseUrl}}/2
+Accept: application/json
+
+###
+
+### 3. Buscar activo por símbolo (GET)
+GET {{baseUrl}}/buscar?simbolo=ethereum
+Accept: application/json
+
+###
+
+### 4. Actualización Completa (PUT) - ID 2
+PUT {{baseUrl}}/2
+Content-Type: application/json
+
+{
+  "simbolo": "ethereum",
+  "nombre": "Ethereum 2.0 (Actualizado)",
+  "cantidad": 3.0,
+  "precioCompraEur": 3100.00,
+  "emailAnalista": "senior@cryptogit.com",
+  "fechaAdquisicion": "2024-01-15",
+  "fechaRevision": "2027-01-01",
+  "riesgoAceptado": true,
+  "etiquetas": ["smart-contracts", "staking"]
+}
+
+###
+
+### 6. Actualización Parcial (PATCH) - Solo cantidad y precio en ID 1
+PATCH {{baseUrl}}/1
+Content-Type: application/json
+
+{
+  "cantidad": 4.5,
+  "precioCompraEur": 3250.75
+}
+
+###
+
+### 7. Valorar activo (Endpoint de CoinGecko API)
+GET {{baseUrl}}/1/valorar
+Accept: application/json
+
+###
+
+### 8. Valorar activo con comisión
+GET {{baseUrl}}/1/valorar-comision?porcentajeComision=5
+Accept: application/json
+
+###
+
+### 9. Eliminar activo por ID (DELETE)
+DELETE {{baseUrl}}/1
+
+###
+
+### 10. Verificar eliminación intentando obtener ID 1
+GET {{baseUrl}}/1
+Accept: application/json

@@ -14,7 +14,7 @@ import java.util.List;
 public class CrearActivoDTO {
     // 1. Regex: De 2 a 10 letras MAYÚSCULAS estrictas (ej. BTC, ETH)
     @NotBlank(message = "El símbolo es obligatorio")
-    @Pattern(regexp = "^[A-Z]{2,10}$", message = "El símbolo debe contener entre 2 y 10 letras MAYÚSCULAS")
+    @Pattern(regexp = "^[a-zA-Z]{2,10}$", message = "El símbolo debe contener entre 2 y 10 letras MAYÚSCULAS")
     private String simbolo;
 
     // 2. Tamaño entre 3 y 50 caracteres

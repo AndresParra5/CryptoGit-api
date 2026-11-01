@@ -3,6 +3,7 @@ package com.daw.cryptogit.controller;
 import com.daw.cryptogit.dto.ActivoCryptoDTO;
 import com.daw.cryptogit.dto.CarteraValoradaDTO;
 import com.daw.cryptogit.dto.CrearActivoDTO;
+import com.daw.cryptogit.dto.PatchActivoDTO;
 import com.daw.cryptogit.model.ActivoCrypto;
 import com.daw.cryptogit.service.CryptoService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -89,5 +90,23 @@ public class CryptoController {
         return service.obtenerPorSimbolo(simbolo)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
+    }
+
+    // PUT /activos/{id} -> Actualización completa usando CrearActivoDTO
+    @PutMapping("/activos/{id}")
+    public ActivoCryptoDTO actualizarCompleto(@PathVariable Long id, @Valid @RequestBody CrearActivoDTO dto) {
+        return service.actualizarCompleto(id, dto);
+    }
+
+    // PATCH /activos/{id} -> Actualización parcial usando PatchActivoDTO
+    @PatchMapping("/activos/{id}")
+    public ActivoCryptoDTO actualizarParcial(@PathVariable Long id, @Valid @RequestBody PatchActivoDTO dto) {
+        return service.actualizarParcial(id, dto);
+    }
+
+    // DELETE /activos/{id} -> Borrado por ID
+    @DeleteMapping("/activos/{id}")
+    public void eliminar(@PathVariable Long id) {
+        service.eliminar(id);
     }
 }

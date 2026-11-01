@@ -1,9 +1,6 @@
 package com.daw.cryptogit.service;
 
-import com.daw.cryptogit.dto.ActivoCryptoDTO;
-import com.daw.cryptogit.dto.CarteraValoradaDTO;
-import com.daw.cryptogit.dto.CoinGeckoResponseDTO;
-import com.daw.cryptogit.dto.CrearActivoDTO;
+import com.daw.cryptogit.dto.*;
 import com.daw.cryptogit.model.ActivoCrypto;
 import com.daw.cryptogit.repository.ActivoCryptoRepository;
 import org.springframework.cache.annotation.CacheEvict;
@@ -41,6 +38,7 @@ public class CryptoService {
                 activo.getEtiquetas()
         );
     }
+
 
     // Convertir lista de entidades a DTOs de salida
     public List<ActivoCryptoDTO> obtenerTodos() {
@@ -141,4 +139,56 @@ public class CryptoService {
         return repository.findBySimbolo(simbolo.toLowerCase())
                 .map(this::convertirADto);
     }
+
+
+    // Reemplazo completo (PUT)
+    public ActivoCryptoDTO actualizarCompleto(Long id, CrearActivoDTO dto) {
+        ActivoCrypto activoExistente = repository.findById(id).orElse(null);
+        if (activoExistente == null) {
+            return null;
+        }
+
+        activoExistente.setNombre(dto.getNombre());
+        activoExistente.setCantidad(dto.getCantidad());
+        activoExistente.setPrecioCompraEur(dto.getPrecioCompraEur());
+        activoExistente.setEmailAnalista(dto.getEmailAnalista());
+        activoExistente.setFechaAdquisicion(dto.getFechaAdquisicion());
+        activoExistente.setFechaRevision(dto.getFechaRevision());
+        activoExistente.setRiesgoAceptado(dto.isRiesgoAceptado());
+
+        if (dto.getEtiquetas() != null) {
+            activoExistente.setEtiquetas(dto.getEtiquetas());
+        }
+
+        ActivoCrypto guardado = repository.save(activoExistente);
+        return convertirADto(guardado);
+    }
+
+    // Modificación parcial (PATCH)
+    public ActivoCryptoDTO actualizarParcial(Long id, PatchActivoDTO dto) {
+        ActivoCrypto activoExistente = repository.findById(id).orElse(null);
+        if (activoExistente == null) {
+            return null;
+        }
+
+        if (dto.getNombre() != null) activoExistente.setNombre(dto.getNombre());
+        if (dto.getCantidad() != null) activoExistente.setCantidad(dto.getCantidad());
+        if (dto.getPrecioCompraEur() != null) activoExistente.setPrecioCompraEur(dto.getPrecioCompraEur());
+        if (dto.getEmailAnalista() != null) activoExistente.setEmailAnalista(dto.getEmailAnalista());
+        if (dto.getFechaAdquisicion() != null) activoExistente.setFechaAdquisicion(dto.getFechaAdquisicion());
+        if (dto.getFechaRevision() != null) activoExistente.setFechaRevision(dto.getFechaRevision());
+        if (dto.getRiesgoAceptado() != null) activoExistente.setRiesgoAceptado(dto.getRiesgoAceptado());
+        if (dto.getEtiquetas() != null) activoExistente.setEtiquetas(dto.getEtiquetas());
+
+        ActivoCrypto guardado = repository.save(activoExistente);
+        return convertirADto(guardado);
+    }
+
+    // Borrado por ID (DELETE)
+    public void eliminar(Long id) {
+        if (repository.existsById(id)) {
+            repository.deleteById(id);
+        }
+    }
+
 }

@@ -1,0 +1,114 @@
+### ===================================================================
+### SUITE DE PRUEBAS DE CRYPTOGIT (CON DATOS DE INICIALIZACIÓN DATA.SQL)
+### ===================================================================
+
+### -------------------------------------------------------------------
+### 1. VERIFICACIÓN DE DATOS DE INICIALIZACIÓN (GET)
+### -------------------------------------------------------------------
+
+### 1.1 Obtener todos los activos cargados desde data.sql
+# Resultado esperado: HTTP 200 OK con el array de 3 activos (Bitcoin, Ethereum, Cardano)
+# Incluye sus 10 campos mapeados en ActivoCryptoDTO y la lista de etiquetas asociadas
+GET http://localhost:8080/api/crypto/activos
+Accept: application/json
+
+###
+
+### 1.2 Buscar el activo con ID 1 (Bitcoin)
+# Resultado esperado: HTTP 200 OK
+GET http://localhost:8080/api/crypto/activos/1
+Accept: application/json
+
+###
+
+### 1.3 Buscar activo por símbolo (Query Parameter)
+# Resultado esperado: HTTP 200 OK con la ficha de Ethereum
+GET http://localhost:8080/api/crypto/activos/buscar?simbolo=ETHEREUM
+Accept: application/json
+
+###
+
+### 1.4 Buscar activo inexistente
+# Resultado esperado: HTTP 404 Not Found
+GET http://localhost:8080/api/crypto/activos/999
+Accept: application/json
+
+###
+
+
+### -------------------------------------------------------------------
+### 2. INTEGRACIÓN CON COINGECKO Y COMISIONES
+### -------------------------------------------------------------------
+
+### 2.1 Valorar Bitcoin (ID 1) consultando la API pública de CoinGecko
+# Resultado esperado: HTTP 200 OK con CarteraValoradaDTO (calcula 1.5 BTC * precio actual EUR)
+GET http://localhost:8080/api/crypto/activos/1/valorar
+Accept: application/json
+
+###
+
+### 2.2 Valorar Ethereum (ID 2) aplicando una comisión válida (2.5%)
+# Resultado esperado: HTTP 200 OK con el valor total incrementado un 2.5%
+GET http://localhost:8080/api/crypto/activos/2/valorar-comision?porcentaje=2.5
+Accept: application/json
+
+###
+
+### 2.3 Valorar con comisión inválida (fuera del rango 0% - 50%)
+# Resultado esperado: HTTP 400 Bad Request
+GET http://localhost:8080/api/crypto/activos/1/valorar-comision?porcentaje=75.0
+Accept: application/json
+
+###
+
+
+### -------------------------------------------------------------------
+### 3. PRUEBAS DE VALIDACIÓN Y PERSISTENCIA (POST)
+### -------------------------------------------------------------------
+
+### 3.1 Intento FALLIDO: Violación de reglas de validación @Valid
+# Resultado esperado: HTTP 400 Bad Request
+# - cantidad: -10 (falla Positive)
+# - emailAnalista: sin arroba (falla Email)
+# - riesgoAceptado: false (falla AssertTrue)
+POST http://localhost:8080/api/crypto/activos
+Content-Type: application/json
+
+{
+  "simbolo": "dot",
+  "nombre": "Polkadot",
+  "cantidad": -10.0,
+  "precioCompraEur": 0.00,
+  "emailAnalista": "analista-invalid",
+  "fechaAdquisicion": "2030-01-01",
+  "fechaRevision": "2020-01-01",
+  "riesgoAceptado": false,
+  "etiquetas": []
+}
+
+###
+
+### 3.2 Intento CORRECTO: Registrar nuevo activo (Polkadot)
+# Resultado esperado: HTTP 201 Created
+# Asigna automáticamente ID 4 en H2 y limpia la caché CacheEvict
+POST http://localhost:8080/api/crypto/activos
+Content-Type: application/json
+
+{
+  "simbolo": "DOT",
+  "nombre": "Polkadot",
+  "cantidad": 150.0,
+  "precioCompraEur": 7.20,
+  "emailAnalista": "tecnico@cryptogit.com",
+  "fechaAdquisicion": "2026-02-10",
+  "fechaRevision": "2027-02-10",
+  "riesgoAceptado": true,
+  "etiquetas": ["PARACHAIN", "INTEROPERABILITY"]
+}
+
+###
+
+### 3.3 Verificar que el nuevo activo se ha persistido en H2 (ID 4)
+# Resultado esperado: HTTP 200 OK devolviendo el registro de Polkadot
+GET http://localhost:8080/api/crypto/activos/4
+Accept: application/json
